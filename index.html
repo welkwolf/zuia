@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Моя Соцсеть - Лента</title>
+    <title>Zuia</title>
     <!-- Подключаем Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -12,14 +12,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; background: #f0f2f5; }
         
-        /* Загрузочный экран */
+        /* Белый загрузочный экран */
         #splashScreen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1877f2, #42b72a);
+            background: white;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -28,33 +28,24 @@
         }
         .splash-content {
             text-align: center;
-            color: white;
-        }
-        .splash-logo {
-            font-size: 64px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
+            color: #1877f2;
         }
         .splash-title {
-            font-size: 32px;
+            font-size: 48px;
             font-weight: bold;
             margin-bottom: 10px;
+            letter-spacing: 2px;
         }
         .splash-subtitle {
             font-size: 18px;
-            opacity: 0.9;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            color: #65676b;
         }
 
         #app { max-width: 600px; margin: 0 auto; padding: 20px; opacity: 0; transition: opacity 0.5s; }
         #app.visible { opacity: 1; }
         
         .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header { background: white; border-radius: 0 0 12px 12px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .header { background: white; border-radius: 0 0 12px 12px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         
         input, textarea, button, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         button { background: #1877f2; color: white; font-weight: 600; cursor: pointer; border: none; transition: background 0.2s; }
@@ -89,8 +80,8 @@
         .profile-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1c1e21; }
         .profile-link:hover .avatar { opacity: 0.8; }
         
-        .nav-links { display: flex; gap: 10px; }
-        .nav-btn { background: #e4e6eb; color: #1c1e21; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 14px; }
+        .nav-links { display: flex; gap: 10px; flex-wrap: wrap; }
+        .nav-btn { background: #e4e6eb; color: #1c1e21; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 14px; border: none; cursor: pointer; }
         .nav-btn:hover { background: #d8dadf; }
         
         .error { color: #dc3545; font-size: 14px; margin-top: 5px; }
@@ -100,22 +91,17 @@
         .current-avatar { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #1877f2; }
         .current-avatar img { width: 100%; height: 100%; object-fit: cover; }
         
-        .subscribe-btn { background: #42b72a; }
-        .subscribe-btn:hover { background: #36a420; }
-        .subscribe-btn.subscribed { background: #e4e6eb; color: #1c1e21; }
+        .profile-settings { border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px; }
         
-        .followers-list { max-height: 300px; overflow-y: auto; }
-        .follower-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; }
-        .follower-item:last-child { border-bottom: none; }
+        .counter-badge { background: #1877f2; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px; margin-left: 5px; }
     </style>
 </head>
 <body>
-    <!-- Загрузочный экран -->
+    <!-- Белый загрузочный экран -->
     <div id="splashScreen">
         <div class="splash-content">
-            <div class="splash-logo">📱</div>
-            <div class="splash-title">Моя Соцсеть</div>
-            <div class="splash-subtitle">Загрузка...</div>
+            <div class="splash-title">ZUIA</div>
+            <div class="splash-subtitle">социальная сеть</div>
         </div>
     </div>
 
@@ -123,19 +109,22 @@
         <!-- Шапка с навигацией -->
         <div class="header hidden" id="mainHeader">
             <div class="nav-links">
-                <a href="index.html" class="nav-btn">🏠 Лента</a>
-                <a href="#" id="profileLinkBtn" class="nav-btn">👤 Мой профиль</a>
-                <button id="showFollowersBtn" class="nav-btn">👥 Мои подписки</button>
+                <a href="index.html" class="nav-btn">Лента</a>
+                <a href="#" id="profileLinkBtn" class="nav-btn">Мой профиль</a>
+                <button id="showFollowersBtn" class="nav-btn">
+                    Мои подписки
+                    <span id="followersCount" class="counter-badge">0</span>
+                </button>
             </div>
             <div id="userInfo">
-                <span id="userEmail"></span>
+                <span id="userDisplay"></span>
                 <button id="logoutBtn" style="width: auto; padding: 8px 16px;">Выйти</button>
             </div>
         </div>
 
         <!-- Секция входа -->
         <div id="authSection" class="card">
-            <h2 style="margin-bottom: 20px;">Вход в Соцсеть</h2>
+            <h2 style="margin-bottom: 20px;">Вход в Zuia</h2>
             <input type="email" id="loginEmail" placeholder="Email" value="test@example.com">
             <input type="password" id="loginPassword" placeholder="Пароль" value="123456">
             <button id="loginBtn">Войти / Зарегистрироваться</button>
@@ -146,7 +135,7 @@
         <!-- Модальное окно подписок -->
         <div id="followersModal" class="card hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; z-index: 1000;">
             <h3 style="margin-bottom: 15px;">Мои подписки</h3>
-            <div id="followersList" class="followers-list"></div>
+            <div id="followersList" class="followers-list" style="max-height: 300px; overflow-y: auto;"></div>
             <button id="closeFollowersBtn" style="margin-top: 15px;">Закрыть</button>
         </div>
         <div id="modalOverlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
@@ -162,17 +151,30 @@
                 <div id="postError" class="error"></div>
             </div>
 
-            <!-- Настройки профиля -->
-            <div class="card">
+            <!-- Настройки профиля (видно только в своем профиле) -->
+            <div class="card profile-settings hidden" id="profileSettings">
                 <h3 style="margin-bottom: 15px;">Настройки профиля</h3>
-                <div class="avatar-upload">
-                    <div class="current-avatar" id="currentAvatar"></div>
-                    <div style="flex: 1;">
-                        <input type="file" id="avatarInput" accept="image/*">
-                        <button id="uploadAvatarBtn" disabled>Загрузить аватар</button>
+                
+                <!-- Никнейм -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Никнейм</label>
+                    <input type="text" id="nicknameInput" placeholder="Введите никнейм">
+                    <button id="saveNicknameBtn" style="margin-top: 5px;">Сохранить никнейм</button>
+                </div>
+
+                <!-- Аватар -->
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Аватар</label>
+                    <div class="avatar-upload">
+                        <div class="current-avatar" id="currentAvatar"></div>
+                        <div style="flex: 1;">
+                            <input type="file" id="avatarInput" accept="image/*">
+                            <button id="uploadAvatarBtn" disabled>Загрузить аватар</button>
+                        </div>
                     </div>
                 </div>
-                <div id="avatarError" class="error"></div>
+                <div id="profileError" class="error"></div>
+                <div id="profileSuccess" class="success"></div>
             </div>
 
             <!-- Лента постов -->
@@ -215,11 +217,12 @@
         const mainHeader = document.getElementById('mainHeader');
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-        const userEmail = document.getElementById('userEmail');
+        const userDisplay = document.getElementById('userDisplay');
         const profileLinkBtn = document.getElementById('profileLinkBtn');
         const authError = document.getElementById('authError');
         const postError = document.getElementById('postError');
-        const avatarError = document.getElementById('avatarError');
+        const profileError = document.getElementById('profileError');
+        const profileSuccess = document.getElementById('profileSuccess');
         const createPostBtn = document.getElementById('createPostBtn');
         const postText = document.getElementById('postText');
         const postImage = document.getElementById('postImage');
@@ -232,13 +235,25 @@
         const modalOverlay = document.getElementById('modalOverlay');
         const followersList = document.getElementById('followersList');
         const closeFollowersBtn = document.getElementById('closeFollowersBtn');
+        const profileSettings = document.getElementById('profileSettings');
+        const nicknameInput = document.getElementById('nicknameInput');
+        const saveNicknameBtn = document.getElementById('saveNicknameBtn');
+        const followersCount = document.getElementById('followersCount');
 
         let currentUser = null;
         let selectedAvatarFile = null;
 
-        // Функция для получения инициалов из email
-        function getInitials(email) {
-            return email ? email.substring(0, 2).toUpperCase() : '?';
+        // Функция для отображения имени пользователя
+        function getDisplayName(userData) {
+            if (userData && userData.nickname) return userData.nickname;
+            if (userData && userData.email) return userData.email.split('@')[0];
+            return 'Пользователь';
+        }
+
+        // Функция для получения инициалов
+        function getInitials(displayName) {
+            if (!displayName) return '?';
+            return displayName.substring(0, 2).toUpperCase();
         }
 
         // Функция для отображения аватара
@@ -247,7 +262,8 @@
             if (userData && userData.avatar) {
                 container.innerHTML = `<img src="${userData.avatar}" alt="Avatar">`;
             } else {
-                container.textContent = getInitials(userData?.email || userData?.author || '?');
+                const displayName = getDisplayName(userData);
+                container.textContent = getInitials(displayName);
                 container.style.background = '#1877f2';
                 container.style.color = 'white';
             }
@@ -258,6 +274,14 @@
         async function loadUserData(userId) {
             const snapshot = await database.ref(`users/${userId}`).once('value');
             return snapshot.val() || {};
+        }
+
+        // Подсчет подписок
+        async function updateFollowersCount() {
+            if (!currentUser) return;
+            const snapshot = await database.ref(`followers/${currentUser.uid}`).once('value');
+            const count = snapshot.val() ? Object.keys(snapshot.val()).length : 0;
+            followersCount.textContent = count;
         }
 
         // --- Аутентификация ---
@@ -276,6 +300,7 @@
                         await database.ref(`users/${userCredential.user.uid}`).set({
                             email: email,
                             avatar: null,
+                            nickname: null,
                             createdAt: firebase.database.ServerValue.TIMESTAMP
                         });
                     } catch (createError) {
@@ -297,15 +322,21 @@
         auth.onAuthStateChanged(async user => {
             if (user) {
                 currentUser = user;
-                userEmail.textContent = user.email;
+                const userData = await loadUserData(user.uid);
+                userDisplay.textContent = getDisplayName(userData);
                 profileLinkBtn.href = `user.html?id=${user.uid}`;
                 
-                // Загружаем данные пользователя
-                const userData = await loadUserData(user.uid);
+                // Показываем настройки профиля
+                profileSettings.classList.remove('hidden');
+                
+                // Загружаем текущие данные
                 if (userData.avatar) {
                     renderAvatar(currentAvatar, userData);
                 } else {
                     renderAvatar(currentAvatar, { email: user.email });
+                }
+                if (userData.nickname) {
+                    nicknameInput.value = userData.nickname;
                 }
                 
                 authSection.classList.add('hidden');
@@ -313,6 +344,7 @@
                 mainHeader.classList.remove('hidden');
                 
                 loadPosts();
+                updateFollowersCount();
             } else {
                 currentUser = null;
                 authSection.classList.remove('hidden');
@@ -322,6 +354,29 @@
         });
 
         logoutBtn.addEventListener('click', () => auth.signOut());
+
+        // --- Сохранение никнейма ---
+        saveNicknameBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            
+            const nickname = nicknameInput.value.trim();
+            try {
+                await database.ref(`users/${currentUser.uid}`).update({
+                    nickname: nickname || null,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                profileSuccess.textContent = 'Никнейм сохранен!';
+                profileError.textContent = '';
+                userDisplay.textContent = nickname || currentUser.email.split('@')[0];
+                
+                setTimeout(() => {
+                    profileSuccess.textContent = '';
+                }, 3000);
+            } catch (error) {
+                profileError.textContent = 'Ошибка сохранения: ' + error.message;
+            }
+        });
 
         // --- Загрузка аватара ---
         avatarInput.addEventListener('change', (e) => {
@@ -343,7 +398,7 @@
 
             try {
                 if (selectedAvatarFile.size > 2 * 1024 * 1024) {
-                    avatarError.textContent = 'Файл слишком большой (макс. 2MB)';
+                    profileError.textContent = 'Файл слишком большой (макс. 2MB)';
                     return;
                 }
 
@@ -351,24 +406,25 @@
                 reader.onload = async (e) => {
                     const avatarBase64 = e.target.result;
                     
-                    // Сохраняем в базу данных
                     await database.ref(`users/${currentUser.uid}`).update({
                         avatar: avatarBase64,
                         updatedAt: firebase.database.ServerValue.TIMESTAMP
                     });
 
-                    avatarError.textContent = '';
-                    avatarError.className = 'success';
-                    avatarError.textContent = 'Аватар успешно загружен!';
+                    profileError.textContent = '';
+                    profileSuccess.textContent = 'Аватар успешно загружен!';
                     uploadAvatarBtn.disabled = true;
                     selectedAvatarFile = null;
                     
-                    // Обновляем посты с новым аватаром
+                    setTimeout(() => {
+                        profileSuccess.textContent = '';
+                    }, 3000);
+                    
                     loadPosts();
                 };
                 reader.readAsDataURL(selectedAvatarFile);
             } catch (error) {
-                avatarError.textContent = 'Ошибка загрузки: ' + error.message;
+                profileError.textContent = 'Ошибка загрузки: ' + error.message;
             }
         });
 
@@ -381,32 +437,33 @@
             
             followersList.innerHTML = '';
             
-            for (const [followerId] of Object.entries(followers)) {
-                const userData = await loadUserData(followerId);
-                const div = document.createElement('div');
-                div.className = 'follower-item';
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'avatar small';
-                renderAvatar(avatar, userData, 'small');
-                
-                const name = document.createElement('span');
-                name.textContent = userData.email || 'Пользователь';
-                
-                const link = document.createElement('a');
-                link.href = `user.html?id=${followerId}`;
-                link.style.marginLeft = 'auto';
-                link.style.color = '#1877f2';
-                link.textContent = 'Профиль';
-                
-                div.appendChild(avatar);
-                div.appendChild(name);
-                div.appendChild(link);
-                followersList.appendChild(div);
-            }
-            
-            if (followersList.children.length === 0) {
+            if (Object.keys(followers).length === 0) {
                 followersList.innerHTML = '<p style="text-align: center; color: #65676b;">Вы еще ни на кого не подписаны</p>';
+            } else {
+                for (const [followerId] of Object.entries(followers)) {
+                    const userData = await loadUserData(followerId);
+                    const div = document.createElement('div');
+                    div.className = 'follower-item';
+                    div.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee;';
+                    
+                    const avatar = document.createElement('div');
+                    avatar.className = 'avatar small';
+                    renderAvatar(avatar, userData, 'small');
+                    
+                    const name = document.createElement('span');
+                    name.textContent = getDisplayName(userData);
+                    
+                    const link = document.createElement('a');
+                    link.href = `user.html?id=${followerId}`;
+                    link.style.marginLeft = 'auto';
+                    link.style.color = '#1877f2';
+                    link.textContent = 'Профиль';
+                    
+                    div.appendChild(avatar);
+                    div.appendChild(name);
+                    div.appendChild(link);
+                    followersList.appendChild(div);
+                }
             }
             
             followersModal.classList.remove('hidden');
@@ -450,6 +507,7 @@
             const newPost = {
                 author: currentUser.email,
                 authorId: currentUser.uid,
+                authorNickname: userData.nickname || null,
                 authorAvatar: userData.avatar || null,
                 text: text || null,
                 image: imageBase64,
@@ -487,6 +545,7 @@
                 for (const post of postsArray) {
                     const userData = await loadUserData(post.authorId);
                     post.authorAvatar = userData.avatar || null;
+                    post.authorDisplayName = getDisplayName(userData);
                 }
 
                 postsFeed.innerHTML = postsArray.map(post => renderPost(post)).join('');
@@ -501,13 +560,14 @@
             const userLiked = post.likes && currentUser && post.likes[currentUser.uid];
             const likesCount = post.likes ? Object.keys(post.likes).length : 0;
             const commentsCount = post.comments ? Object.keys(post.comments).length : 0;
+            const authorName = post.authorNickname || post.author?.split('@')[0] || 'Аноним';
 
             return `
                 <div class="post" data-post-id="${post.id}">
                     <div class="post-header">
-                        <div class="avatar">${post.authorAvatar ? `<img src="${post.authorAvatar}" alt="Avatar">` : (post.author ? post.author.substring(0, 2).toUpperCase() : '??')}</div>
+                        <div class="avatar">${post.authorAvatar ? `<img src="${post.authorAvatar}" alt="Avatar">` : getInitials(authorName)}</div>
                         <div>
-                            <a href="user.html?id=${post.authorId}" class="post-author">${post.author || 'Аноним'}</a>
+                            <a href="user.html?id=${post.authorId}" class="post-author">${authorName}</a>
                             <div class="post-time">${post.timestamp ? new Date(post.timestamp).toLocaleString() : 'только что'}</div>
                         </div>
                     </div>
@@ -515,7 +575,7 @@
                     ${post.image ? `<img src="${post.image}" class="post-image" alt="Post image">` : ''}
                     <div class="post-actions">
                         <button class="action-btn like-btn ${userLiked ? 'active' : ''}" data-post-id="${post.id}">
-                            ${userLiked ? '❤️' : '🤍'} <span>${likesCount}</span>
+                            ❤ <span>${likesCount}</span>
                         </button>
                         <button class="action-btn comment-toggle-btn" data-post-id="${post.id}">
                             💬 <span>${commentsCount}</span>
@@ -538,7 +598,7 @@
             if (!comments) return '';
             return Object.entries(comments).map(([id, comment]) => `
                 <div class="comment">
-                    <a href="user.html?id=${comment.authorId}" class="comment-author">${comment.author || 'Аноним'}</a>
+                    <a href="user.html?id=${comment.authorId}" class="comment-author">${comment.author?.split('@')[0] || 'Аноним'}</a>
                     <span>${escapeHtml(comment.text)}</span>
                 </div>
             `).join('');
