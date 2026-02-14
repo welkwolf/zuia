@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя Соцсеть - Лента</title>
+    <!-- Подключаем Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; background: #f0f2f5; }
+        
+        /* Загрузочный экран */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1877f2, #42b72a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        .splash-content {
+            text-align: center;
+            color: white;
+        }
+        .splash-logo {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        .splash-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .splash-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        #app { max-width: 600px; margin: 0 auto; padding: 20px; opacity: 0; transition: opacity 0.5s; }
+        #app.visible { opacity: 1; }
+        
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: white; border-radius: 0 0 12px 12px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        
+        input, textarea, button, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        button { background: #1877f2; color: white; font-weight: 600; cursor: pointer; border: none; transition: background 0.2s; }
+        button:hover { background: #166fe5; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .post { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #1877f2; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar.small { width: 30px; height: 30px; font-size: 14px; }
+        .avatar.large { width: 100px; height: 100px; font-size: 42px; }
+        
+        .post-author { font-weight: 600; color: #1c1e21; text-decoration: none; }
+        .post-author:hover { text-decoration: underline; }
+        .post-time { font-size: 12px; color: #65676b; }
+        .post-content { margin: 12px 0; white-space: pre-wrap; line-height: 1.5; }
+        .post-image { max-width: 100%; border-radius: 12px; margin: 12px 0; }
+        
+        .post-actions { display: flex; gap: 20px; border-top: 1px solid #ddd; padding-top: 12px; margin-top: 12px; }
+        .action-btn { background: none; border: none; color: #65676b; cursor: pointer; padding: 8px 16px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .action-btn:hover { background: #f0f2f5; }
+        .action-btn.active { color: #1877f2; }
+        
+        .comment-box { margin-top: 15px; padding-left: 20px; border-left: 3px solid #1877f2; }
+        .comment { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .comment-author { font-weight: 600; color: #1877f2; text-decoration: none; }
+        
+        .hidden { display: none; }
+        
+        #userInfo { display: flex; align-items: center; gap: 20px; }
+        .profile-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1c1e21; }
+        .profile-link:hover .avatar { opacity: 0.8; }
+        
+        .nav-links { display: flex; gap: 10px; }
+        .nav-btn { background: #e4e6eb; color: #1c1e21; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 14px; }
+        .nav-btn:hover { background: #d8dadf; }
+        
+        .error { color: #dc3545; font-size: 14px; margin-top: 5px; }
+        .success { color: #28a745; font-size: 14px; }
+        
+        .avatar-upload { display: flex; align-items: center; gap: 20px; margin: 15px 0; }
+        .current-avatar { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #1877f2; }
+        .current-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .subscribe-btn { background: #42b72a; }
+        .subscribe-btn:hover { background: #36a420; }
+        .subscribe-btn.subscribed { background: #e4e6eb; color: #1c1e21; }
+        
+        .followers-list { max-height: 300px; overflow-y: auto; }
+        .follower-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; }
+        .follower-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <!-- Загрузочный экран -->
+    <div id="splashScreen">
+        <div class="splash-content">
+            <div class="splash-logo">📱</div>
+            <div class="splash-title">Моя Соцсеть</div>
+            <div class="splash-subtitle">Загрузка...</div>
+        </div>
+    </div>
+
+    <div id="app">
+        <!-- Шапка с навигацией -->
+        <div class="header hidden" id="mainHeader">
+            <div class="nav-links">
+                <a href="index.html" class="nav-btn">🏠 Лента</a>
+                <a href="#" id="profileLinkBtn" class="nav-btn">👤 Мой профиль</a>
+                <button id="showFollowersBtn" class="nav-btn">👥 Мои подписки</button>
+            </div>
+            <div id="userInfo">
+                <span id="userEmail"></span>
+                <button id="logoutBtn" style="width: auto; padding: 8px 16px;">Выйти</button>
+            </div>
+        </div>
+
+        <!-- Секция входа -->
+        <div id="authSection" class="card">
+            <h2 style="margin-bottom: 20px;">Вход в Соцсеть</h2>
+            <input type="email" id="loginEmail" placeholder="Email" value="test@example.com">
+            <input type="password" id="loginPassword" placeholder="Пароль" value="123456">
+            <button id="loginBtn">Войти / Зарегистрироваться</button>
+            <p class="small-text" style="margin-top: 10px; color: #65676b;">Если аккаунта нет - он будет создан автоматически</p>
+            <div id="authError" class="error"></div>
+        </div>
+
+        <!-- Модальное окно подписок -->
+        <div id="followersModal" class="card hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; z-index: 1000;">
+            <h3 style="margin-bottom: 15px;">Мои подписки</h3>
+            <div id="followersList" class="followers-list"></div>
+            <button id="closeFollowersBtn" style="margin-top: 15px;">Закрыть</button>
+        </div>
+        <div id="modalOverlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
+        <!-- Основное приложение -->
+        <div id="appSection" class="hidden">
+            <!-- Форма создания поста -->
+            <div class="card">
+                <h3 style="margin-bottom: 15px;">Создать пост</h3>
+                <textarea id="postText" rows="3" placeholder="Что у вас нового?"></textarea>
+                <input type="file" id="postImage" accept="image/*">
+                <button id="createPostBtn">Опубликовать</button>
+                <div id="postError" class="error"></div>
+            </div>
+
+            <!-- Настройки профиля -->
+            <div class="card">
+                <h3 style="margin-bottom: 15px;">Настройки профиля</h3>
+                <div class="avatar-upload">
+                    <div class="current-avatar" id="currentAvatar"></div>
+                    <div style="flex: 1;">
+                        <input type="file" id="avatarInput" accept="image/*">
+                        <button id="uploadAvatarBtn" disabled>Загрузить аватар</button>
+                    </div>
+                </div>
+                <div id="avatarError" class="error"></div>
+            </div>
+
+            <!-- Лента постов -->
+            <div id="postsFeed"></div>
+        </div>
+    </div>
+
+    <script>
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOwAvJ9bH2eeD8wcM4bK_83IEAH9o_HtE",
+            authDomain: "zorokuboch.firebaseapp.com",
+            databaseURL: "https://zorokuboch-default-rtdb.firebaseio.com",
+            projectId: "zorokuboch",
+            storageBucket: "zorokuboch.firebasestorage.app",
+            messagingSenderId: "453409495112",
+            appId: "1:453409495112:web:816b7d0ec4fc530206207d",
+            measurementId: "G-2CJCQ200YT"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Скрываем загрузочный экран через 2 секунды
+        setTimeout(() => {
+            const splashScreen = document.getElementById('splashScreen');
+            const app = document.getElementById('app');
+            splashScreen.style.opacity = '0';
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+                app.classList.add('visible');
+            }, 500);
+        }, 2000);
+
+        // DOM элементы
+        const authSection = document.getElementById('authSection');
+        const appSection = document.getElementById('appSection');
+        const mainHeader = document.getElementById('mainHeader');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userEmail = document.getElementById('userEmail');
+        const profileLinkBtn = document.getElementById('profileLinkBtn');
+        const authError = document.getElementById('authError');
+        const postError = document.getElementById('postError');
+        const avatarError = document.getElementById('avatarError');
+        const createPostBtn = document.getElementById('createPostBtn');
+        const postText = document.getElementById('postText');
+        const postImage = document.getElementById('postImage');
+        const postsFeed = document.getElementById('postsFeed');
+        const avatarInput = document.getElementById('avatarInput');
+        const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
+        const currentAvatar = document.getElementById('currentAvatar');
+        const showFollowersBtn = document.getElementById('showFollowersBtn');
+        const followersModal = document.getElementById('followersModal');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const followersList = document.getElementById('followersList');
+        const closeFollowersBtn = document.getElementById('closeFollowersBtn');
+
+        let currentUser = null;
+        let selectedAvatarFile = null;
+
+        // Функция для получения инициалов из email
+        function getInitials(email) {
+            return email ? email.substring(0, 2).toUpperCase() : '?';
+        }
+
+        // Функция для отображения аватара
+        function renderAvatar(container, userData, size = 'small') {
+            const sizeClass = size === 'large' ? 'large' : (size === 'small' ? 'small' : '');
+            if (userData && userData.avatar) {
+                container.innerHTML = `<img src="${userData.avatar}" alt="Avatar">`;
+            } else {
+                container.textContent = getInitials(userData?.email || userData?.author || '?');
+                container.style.background = '#1877f2';
+                container.style.color = 'white';
+            }
+            container.className = `avatar ${sizeClass}`;
+        }
+
+        // Загрузка данных пользователя
+        async function loadUserData(userId) {
+            const snapshot = await database.ref(`users/${userId}`).once('value');
+            return snapshot.val() || {};
+        }
+
+        // --- Аутентификация ---
+        const handleLogin = async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            authError.textContent = '';
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    try {
+                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        // Создаем запись пользователя в БД
+                        await database.ref(`users/${userCredential.user.uid}`).set({
+                            email: email,
+                            avatar: null,
+                            createdAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    } catch (createError) {
+                        authError.textContent = 'Ошибка создания: ' + createError.message;
+                    }
+                } else {
+                    authError.textContent = 'Ошибка входа: ' + error.message;
+                }
+            }
+        };
+
+        loginBtn.addEventListener('click', handleLogin);
+
+        document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        // Отслеживаем состояние аутентификации
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                currentUser = user;
+                userEmail.textContent = user.email;
+                profileLinkBtn.href = `user.html?id=${user.uid}`;
+                
+                // Загружаем данные пользователя
+                const userData = await loadUserData(user.uid);
+                if (userData.avatar) {
+                    renderAvatar(currentAvatar, userData);
+                } else {
+                    renderAvatar(currentAvatar, { email: user.email });
+                }
+                
+                authSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                mainHeader.classList.remove('hidden');
+                
+                loadPosts();
+            } else {
+                currentUser = null;
+                authSection.classList.remove('hidden');
+                appSection.classList.add('hidden');
+                mainHeader.classList.add('hidden');
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => auth.signOut());
+
+        // --- Загрузка аватара ---
+        avatarInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                selectedAvatarFile = e.target.files[0];
+                uploadAvatarBtn.disabled = false;
+                
+                // Превью
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentAvatar.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+                };
+                reader.readAsDataURL(selectedAvatarFile);
+            }
+        });
+
+        uploadAvatarBtn.addEventListener('click', async () => {
+            if (!selectedAvatarFile || !currentUser) return;
+
+            try {
+                if (selectedAvatarFile.size > 2 * 1024 * 1024) {
+                    avatarError.textContent = 'Файл слишком большой (макс. 2MB)';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const avatarBase64 = e.target.result;
+                    
+                    // Сохраняем в базу данных
+                    await database.ref(`users/${currentUser.uid}`).update({
+                        avatar: avatarBase64,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+
+                    avatarError.textContent = '';
+                    avatarError.className = 'success';
+                    avatarError.textContent = 'Аватар успешно загружен!';
+                    uploadAvatarBtn.disabled = true;
+                    selectedAvatarFile = null;
+                    
+                    // Обновляем посты с новым аватаром
+                    loadPosts();
+                };
+                reader.readAsDataURL(selectedAvatarFile);
+            } catch (error) {
+                avatarError.textContent = 'Ошибка загрузки: ' + error.message;
+            }
+        });
+
+        // --- Подписки ---
+        showFollowersBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            
+            const followersSnapshot = await database.ref(`followers/${currentUser.uid}`).once('value');
+            const followers = followersSnapshot.val() || {};
+            
+            followersList.innerHTML = '';
+            
+            for (const [followerId] of Object.entries(followers)) {
+                const userData = await loadUserData(followerId);
+                const div = document.createElement('div');
+                div.className = 'follower-item';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar small';
+                renderAvatar(avatar, userData, 'small');
+                
+                const name = document.createElement('span');
+                name.textContent = userData.email || 'Пользователь';
+                
+                const link = document.createElement('a');
+                link.href = `user.html?id=${followerId}`;
+                link.style.marginLeft = 'auto';
+                link.style.color = '#1877f2';
+                link.textContent = 'Профиль';
+                
+                div.appendChild(avatar);
+                div.appendChild(name);
+                div.appendChild(link);
+                followersList.appendChild(div);
+            }
+            
+            if (followersList.children.length === 0) {
+                followersList.innerHTML = '<p style="text-align: center; color: #65676b;">Вы еще ни на кого не подписаны</p>';
+            }
+            
+            followersModal.classList.remove('hidden');
+            modalOverlay.classList.remove('hidden');
+        });
+
+        closeFollowersBtn.addEventListener('click', () => {
+            followersModal.classList.add('hidden');
+            modalOverlay.classList.add('hidden');
+        });
+
+        modalOverlay.addEventListener('click', () => {
+            followersModal.classList.add('hidden');
+            modalOverlay.classList.add('hidden');
+        });
+
+        // --- Работа с постами ---
+        const createPost = async () => {
+            const text = postText.value.trim();
+            if (!text && !postImage.files[0]) {
+                postError.textContent = 'Напишите текст или выберите фото';
+                return;
+            }
+
+            let imageBase64 = null;
+            if (postImage.files[0]) {
+                const file = postImage.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    postError.textContent = 'Файл слишком большой (макс. 5MB)';
+                    return;
+                }
+                imageBase64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            const userData = await loadUserData(currentUser.uid);
+
+            const newPost = {
+                author: currentUser.email,
+                authorId: currentUser.uid,
+                authorAvatar: userData.avatar || null,
+                text: text || null,
+                image: imageBase64,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                likes: {},
+                comments: {}
+            };
+
+            try {
+                await database.ref('posts').push(newPost);
+                postText.value = '';
+                postImage.value = '';
+                postError.textContent = '';
+            } catch (error) {
+                postError.textContent = 'Ошибка публикации: ' + error.message;
+            }
+        };
+
+        createPostBtn.addEventListener('click', createPost);
+
+        // Загрузка постов
+        const loadPosts = () => {
+            const postsRef = database.ref('posts').orderByChild('timestamp');
+            postsRef.on('value', async (snapshot) => {
+                const posts = snapshot.val();
+                if (!posts) {
+                    postsFeed.innerHTML = '<div class="card">Пока нет постов. Будьте первым!</div>';
+                    return;
+                }
+
+                const postsArray = Object.entries(posts).map(([id, data]) => ({ id, ...data }));
+                postsArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                // Загружаем данные авторов
+                for (const post of postsArray) {
+                    const userData = await loadUserData(post.authorId);
+                    post.authorAvatar = userData.avatar || null;
+                }
+
+                postsFeed.innerHTML = postsArray.map(post => renderPost(post)).join('');
+
+                postsArray.forEach(post => {
+                    setupPostListeners(post.id);
+                });
+            });
+        };
+
+        const renderPost = (post) => {
+            const userLiked = post.likes && currentUser && post.likes[currentUser.uid];
+            const likesCount = post.likes ? Object.keys(post.likes).length : 0;
+            const commentsCount = post.comments ? Object.keys(post.comments).length : 0;
+
+            return `
+                <div class="post" data-post-id="${post.id}">
+                    <div class="post-header">
+                        <div class="avatar">${post.authorAvatar ? `<img src="${post.authorAvatar}" alt="Avatar">` : (post.author ? post.author.substring(0, 2).toUpperCase() : '??')}</div>
+                        <div>
+                            <a href="user.html?id=${post.authorId}" class="post-author">${post.author || 'Аноним'}</a>
+                            <div class="post-time">${post.timestamp ? new Date(post.timestamp).toLocaleString() : 'только что'}</div>
+                        </div>
+                    </div>
+                    ${post.text ? `<div class="post-content">${escapeHtml(post.text)}</div>` : ''}
+                    ${post.image ? `<img src="${post.image}" class="post-image" alt="Post image">` : ''}
+                    <div class="post-actions">
+                        <button class="action-btn like-btn ${userLiked ? 'active' : ''}" data-post-id="${post.id}">
+                            ${userLiked ? '❤️' : '🤍'} <span>${likesCount}</span>
+                        </button>
+                        <button class="action-btn comment-toggle-btn" data-post-id="${post.id}">
+                            💬 <span>${commentsCount}</span>
+                        </button>
+                    </div>
+                    <div class="comment-box hidden" id="comments-${post.id}">
+                        <div class="comments-list" id="comments-list-${post.id}">
+                            ${renderComments(post.comments)}
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <input type="text" id="comment-input-${post.id}" placeholder="Напишите комментарий..." style="flex: 1;">
+                            <button class="action-btn add-comment-btn" data-post-id="${post.id}" style="width: auto;">Отправить</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderComments = (comments) => {
+            if (!comments) return '';
+            return Object.entries(comments).map(([id, comment]) => `
+                <div class="comment">
+                    <a href="user.html?id=${comment.authorId}" class="comment-author">${comment.author || 'Аноним'}</a>
+                    <span>${escapeHtml(comment.text)}</span>
+                </div>
+            `).join('');
+        };
+
+        const setupPostListeners = (postId) => {
+            const likeBtn = document.querySelector(`.like-btn[data-post-id="${postId}"]`);
+            if (likeBtn) {
+                likeBtn.addEventListener('click', () => handleLike(postId));
+            }
+
+            const commentToggle = document.querySelector(`.comment-toggle-btn[data-post-id="${postId}"]`);
+            if (commentToggle) {
+                commentToggle.addEventListener('click', () => {
+                    const commentBox = document.getElementById(`comments-${postId}`);
+                    commentBox.classList.toggle('hidden');
+                });
+            }
+
+            const addCommentBtn = document.querySelector(`.add-comment-btn[data-post-id="${postId}"]`);
+            if (addCommentBtn) {
+                addCommentBtn.addEventListener('click', () => {
+                    const input = document.getElementById(`comment-input-${postId}`);
+                    const text = input.value.trim();
+                    if (text) {
+                        handleAddComment(postId, text);
+                        input.value = '';
+                    }
+                });
+            }
+
+            const commentInput = document.getElementById(`comment-input-${postId}`);
+            if (commentInput) {
+                commentInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const text = e.target.value.trim();
+                        if (text) {
+                            handleAddComment(postId, text);
+                            e.target.value = '';
+                        }
+                    }
+                });
+            }
+        };
+
+        const handleLike = async (postId) => {
+            if (!currentUser) return;
+            
+            const postRef = database.ref(`posts/${postId}/likes/${currentUser.uid}`);
+            const snapshot = await postRef.once('value');
+            
+            if (snapshot.exists()) {
+                await postRef.remove();
+            } else {
+                await postRef.set(true);
+            }
+        };
+
+        const handleAddComment = async (postId, text) => {
+            if (!currentUser || !text) return;
+
+            const newComment = {
+                author: currentUser.email,
+                authorId: currentUser.uid,
+                text: text,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            await database.ref(`posts/${postId}/comments`).push(newComment);
+        };
+
+        const escapeHtml = (text) => {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+    </script>
+</body>
+</html>
