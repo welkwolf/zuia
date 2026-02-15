@@ -13,7 +13,7 @@
         
         :root {
             --primary-color: #2d2d2e;
-            --primary-hover: #166fe5;
+            --primary-hover: #8f8e8b;
             --bg-color: #f0f2f5;
             --card-bg: white;
             --sidebar-bg: #484b4f;
@@ -99,6 +99,7 @@
             gap: 20px;
             flex: 1;
             width: 100%;
+			 justify-content: center;
         }
 
         .sidebar-btn {
@@ -112,18 +113,19 @@
             background: transparent;
             border: none;
             cursor: pointer;
-            color: var(--text-secondary);
+            color: white;
+			 justify-content: center;
             transition: all 0.2s;
-            position: relative;
+            ///position: relative;
         }
 
         .sidebar-btn:hover {
-            background: var(--bg-color);
-            color: var(--primary-color);
+            
+            color: white;
         }
 
         .sidebar-btn.active {
-            background: var(--primary-color);
+           
             color: white;
         }
 
@@ -425,8 +427,8 @@
         /* Анимации */
         @keyframes slideIn {
             from {
-                opacity: 0;
-                transform: translateX(-20px);
+                opacity: 1;
+                transform: translateX(0);
             }
             to {
                 opacity: 1;
@@ -438,89 +440,65 @@
             animation: slideIn 0.3s ease-out;
         }
     </style>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <!-- Белый загрузочный экран -->
     <div id="splashScreen">
         <div class="splash-content">
-            <div class="splash-title">загрузочка...</div>
+            <div class="splash-title">ZUIA</div>
+            <div class="splash-subtitle">социальная сеть</div>
         </div>
     </div>
 
     <div id="app">
         <!-- Боковая панель -->
-        <div class="sidebar hidden" id="sidebar">
-           
-            
-            <div class="sidebar-nav">
-                <button class="sidebar-btn active" id="homeBtn" title="Лента">🏠</button>
-                <button class="sidebar-btn" id="followersSidebarBtn" title="Подписки">
-                    👥
-                    <span id="sidebarFollowersCount" class="badge">0</span>
-                </button>
-                <button class="sidebar-btn" id="settingsSidebarBtn" title="Настройки">⚙️</button>
-            </div>
-
-            <div class="sidebar-footer">
-                
-                <button class="sidebar-btn" id="logoutSidebarBtn" title="Выйти">🚪</button>
-            </div>
-        </div>
+        <div class="sidebar">
+    
+    <div class="sidebar-nav">
+        <button class="sidebar-btn" id="homeBtn" title="Лента">
+            <i class="fas fa-home fa-light"></i>
+        </button>
+        <button class="sidebar-btn" id="profileSidebarBtn" onclick='navigateToUserProfile()' title="Профиль">
+            <i class="fas fa-user fa-light"></i>
+        </button>
+        <button class="sidebar-btn" id="followersSidebarBtn" title="Подписки">
+            <i class="fas fa-users"></i>
+        </button>
+        <button class="sidebar-btn" onclick="window.location.href='settings.html'" title="Настройки">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
+</div>
 
         <!-- Основной контент -->
         <div class="main-content">
             <!-- Секция входа -->
             <div id="authSection" class="card">
                 <h2 style="margin-bottom: 20px;">Вход в Zuia</h2>
-                <input type="email" id="loginEmail" placeholder="Email" value="test@example.com">
-                <input type="password" id="loginPassword" placeholder="Пароль" value="123456">
-                <button id="loginBtn">Войти</button>
-                <p class="small-text" style="margin-top: 10px; color: #65676b;">Если аккаунта нет - попросите в ТГ: @maxunderwolf</p>
-                <div id="authError" class="error"></div>
-            </div>
+                
+                
+                
+                <!-- Форма входа по паролю -->
+                <div class="auth-form" id="passwordAuthForm">
+                    <input type="email" id="loginEmail" placeholder="Email" value="test@example.com">
+                    <input type="password" id="loginPassword" placeholder="Пароль" value="123456">
+                    <button id="loginBtn">Войти</button>
+                    <p class="small-text" style="margin-top: 10px; color: #65676b;">Если аккаунта нет - создайтё новый!</p>
+					<button id="registerBtn" onclick="window.location.href='register.html'">Зарегистрироваться</button>
+                </div>
+                
+               
 
             <!-- Основное приложение -->
             <div id="appSection" class="hidden">
                 <!-- Форма создания поста -->
                 <div class="card" id="createPostSection">
-                    <h3 style="margin-bottom: 15px;">Создать пост</h3>
-                    <textarea id="postText" rows="3" placeholder="Что у вас нового?"></textarea>
+                    <h3 style="margin-bottom: 15px;">Написать пост</h3>
+                    <textarea id="postText" rows="3" placeholder="Что интересного сегодня случилось?)"></textarea>
                     <input type="file" id="postImage" accept="image/*">
-                    <button id="createPostBtn">📤 Опубликовать</button>
+                    <button id="createPostBtn">Опубликовать</button>
                     <div id="postError" class="error"></div>
-                </div>
-
-                <!-- Настройки профиля -->
-                <div class="card hidden" id="profileSettings">
-                    <h3 style="margin-bottom: 15px;">⚙️ Настройки профиля</h3>
-                    
-                    <!-- Никнейм -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Никнейм</label>
-                        <input type="text" id="nicknameInput" placeholder="Введите никнейм">
-                        <button id="saveNicknameBtn" style="margin-top: 5px;">💾 Сохранить никнейм</button>
-                    </div>
-
-                    <!-- Аватар -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Аватар</label>
-                        <div class="avatar-upload">
-                            <div class="current-avatar" id="currentAvatar"></div>
-                            <div style="flex: 1;">
-                                <input type="file" id="avatarInput" accept="image/*">
-                                <button id="uploadAvatarBtn" disabled>📸 Загрузить аватар</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Верификация (только для админа) -->
-                    <div class="hidden" id="verifiedSection">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">✓ Верификация</label>
-                        <button id="toggleVerifiedBtn">Выдать галочку</button>
-                    </div>
-
-                    <div id="profileError" class="error"></div>
-                    <div id="profileSuccess" class="success"></div>
                 </div>
 
                 <!-- Лента постов -->
@@ -540,15 +518,14 @@
     <script>
         // Конфигурация Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyCOwAvJ9bH2eeD8wcM4bK_83IEAH9o_HtE",
-            authDomain: "zorokuboch.firebaseapp.com",
-            databaseURL: "https://zorokuboch-default-rtdb.firebaseio.com",
-            projectId: "zorokuboch",
-            storageBucket: "zorokuboch.firebasestorage.app",
-            messagingSenderId: "453409495112",
-            appId: "1:453409495112:web:816b7d0ec4fc530206207d",
-            measurementId: "G-2CJCQ200YT"
-        };
+    apiKey: "AIzaSyAJW7vdvyHSv8CTOPG94ZhguocyrtRCezQ",
+    authDomain: "postyak-23e03.firebaseapp.com",
+    databaseURL: "https://postyak-23e03-default-rtdb.firebaseio.com",
+    projectId: "postyak-23e03",
+    storageBucket: "postyak-23e03.firebasestorage.app",
+    messagingSenderId: "595233424361",
+    appId: "1:595233424361:web:d915b8663541aaa1728178"
+  };
 
         // Инициализация Firebase
         try {
@@ -557,9 +534,15 @@
         } catch (error) {
             console.error('Ошибка инициализации Firebase:', error);
         }
-        
+        function navigateToUserProfile() {
+		    window.location.href = `user.html?id=${currentUser.uid}`;
+            
+        }
         const auth = firebase.auth();
         const database = firebase.database();
+
+        // Настройка для входа по email
+        auth.useDeviceLanguage(); // Использует язык браузера для писем
 
         // Скрываем загрузочный экран через 2 секунды
         setTimeout(() => {
@@ -578,8 +561,93 @@
         const authSection = document.getElementById('authSection');
         const appSection = document.getElementById('appSection');
         const sidebar = document.getElementById('sidebar');
-        const loginBtn = document.getElementById('loginBtn');
         const authError = document.getElementById('authError');
+        const authSuccess = document.getElementById('authSuccess');
+        
+        // Элементы для входа по паролю
+        const emailPasswordTab = document.getElementById('emailPasswordTab');
+        const emailCodeTab = document.getElementById('emailCodeTab');
+        const passwordAuthForm = document.getElementById('passwordAuthForm');
+        const codeAuthForm = document.getElementById('codeAuthForm');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        
+        // Элементы для входа по коду
+        const codeEmail = document.getElementById('codeEmail');
+        const sendCodeBtn = document.getElementById('sendCodeBtn');
+        const codeVerificationSection = document.getElementById('codeVerificationSection');
+        const codeInputs = ['code1', 'code2', 'code3', 'code4', 'code5', 'code6'].map(id => document.getElementById(id));
+        const verifyCodeBtn = document.getElementById('verifyCodeBtn');
+        const timerEl = document.getElementById('timer');
+        const resendCode = document.getElementById('resendCode');
+        
+        // Переменные для входа по коду
+        let confirmationResult = null;
+        let timerInterval = null;
+        let timeLeft = 60;
+
+        // Переключение между вкладками
+        emailPasswordTab.addEventListener('click', () => {
+            emailPasswordTab.classList.add('active');
+            emailCodeTab.classList.remove('active');
+            passwordAuthForm.classList.remove('hidden');
+            codeAuthForm.classList.add('hidden');
+            authError.textContent = '';
+            authSuccess.textContent = '';
+        });
+
+        emailCodeTab.addEventListener('click', () => {
+            emailCodeTab.classList.add('active');
+            emailPasswordTab.classList.remove('active');
+            passwordAuthForm.classList.add('hidden');
+            codeAuthForm.classList.remove('hidden');
+            authError.textContent = '';
+            authSuccess.textContent = '';
+        });
+
+        // --- Вход по паролю ---
+        const handlePasswordLogin = async () => {
+            const email = loginEmail.value;
+            const password = loginPassword.value;
+            authError.textContent = '';
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    try {
+                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        await database.ref(`users/${userCredential.user.uid}`).set({
+                            email: email,
+                            avatar: null,
+                            nickname: null,
+                            verified: false,
+                            createdAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    } catch (createError) {
+                        authError.textContent = 'Ошибка создания: ' + createError.message;
+                    }
+                } else {
+                    authError.textContent = 'Ошибка входа: ' + error.message;
+                }
+            }
+        };
+
+        if (loginBtn) {
+            loginBtn.addEventListener('click', handlePasswordLogin);
+        }
+
+        if (loginPassword) {
+            loginPassword.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handlePasswordLogin();
+            });
+        }
+
+        
+
+        // --- Остальной код (как в предыдущей версии) ---
+        // DOM элементы для основного приложения
         const postError = document.getElementById('postError');
         const profileError = document.getElementById('profileError');
         const profileSuccess = document.getElementById('profileSuccess');
@@ -680,62 +748,21 @@
                 if (profileSettings) profileSettings.classList.add('hidden');
                 if (homeBtn) homeBtn.classList.add('active');
             } else if (section === 'profile') {
-                if (createPostSection) createPostSection.classList.add('hidden');
-                if (profileSettings) profileSettings.classList.remove('hidden');
-                if (profileSidebarBtn) profileSidebarBtn.classList.add('active');
+                 profileSidebarBtn.href = `user.html?id=${user.uid}`;
             } else if (section === 'settings') {
                 if (createPostSection) createPostSection.classList.add('hidden');
                 if (profileSettings) profileSettings.classList.remove('hidden');
                 if (settingsSidebarBtn) settingsSidebarBtn.classList.add('active');
             }
         }
-
-        // --- Аутентификация ---
-        const handleLogin = async () => {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            if (authError) authError.textContent = '';
-            
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-            } catch (error) {
-                if (error.code === 'auth/user-not-found') {
-                    try {
-                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                        await database.ref(`users/${userCredential.user.uid}`).set({
-                            email: email,
-                            avatar: null,
-                            nickname: null,
-                            verified: false,
-                            createdAt: firebase.database.ServerValue.TIMESTAMP
-                        });
-                    } catch (createError) {
-                        if (authError) authError.textContent = 'Ошибка создания: ' + createError.message;
-                    }
-                } else {
-                    if (authError) authError.textContent = 'Ошибка входа: ' + error.message;
-                }
-            }
-        };
-
-        if (loginBtn) {
-            loginBtn.addEventListener('click', handleLogin);
-        }
-
-        const loginPassword = document.getElementById('loginPassword');
-        if (loginPassword) {
-            loginPassword.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleLogin();
-            });
-        }
-
+        
         // Отслеживаем состояние аутентификации
         auth.onAuthStateChanged(async user => {
             if (user) {
                 currentUser = user;
                 const userData = await loadUserData(user.uid);
-                
-                // Проверяем, админ ли это (можно задать конкретный email)
+                profileSidebarBtn.href = `user.html?id=${user.uid}`;
+                // Проверяем, админ ли это
                 if (user.email === 'admin@zuia.com' && verifiedSection) {
                     verifiedSection.classList.remove('hidden');
                 }
@@ -775,30 +802,7 @@
             logoutSidebarBtn.addEventListener('click', () => auth.signOut());
         }
 
-        // Тема (простое переключение)
-        let darkMode = false;
-        if (themeBtn) {
-            themeBtn.addEventListener('click', () => {
-                darkMode = !darkMode;
-                if (darkMode) {
-                    document.documentElement.style.setProperty('--bg-color', '#18191a');
-                    document.documentElement.style.setProperty('--card-bg', '#242526');
-                    document.documentElement.style.setProperty('--sidebar-bg', '#242526');
-                    document.documentElement.style.setProperty('--text-primary', '#e4e6eb');
-                    document.documentElement.style.setProperty('--text-secondary', '#b0b3b8');
-                    document.documentElement.style.setProperty('--border-color', '#3e4042');
-                    themeBtn.textContent = '☀️';
-                } else {
-                    document.documentElement.style.setProperty('--bg-color', '#f0f2f5');
-                    document.documentElement.style.setProperty('--card-bg', 'white');
-                    document.documentElement.style.setProperty('--sidebar-bg', 'white');
-                    document.documentElement.style.setProperty('--text-primary', '#1c1e21');
-                    document.documentElement.style.setProperty('--text-secondary', '#65676b');
-                    document.documentElement.style.setProperty('--border-color', '#ddd');
-                    themeBtn.textContent = '🌙';
-                }
-            });
-        }
+        
 
         // --- Сохранение никнейма ---
         if (saveNicknameBtn) {
