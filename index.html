@@ -31,7 +31,7 @@
             min-height: 100vh;
         }
 
-        /* Белый загрузочный экран */
+        /* Загрузочный экран */
         #splashScreen {
             position: fixed;
             top: 0;
@@ -99,7 +99,7 @@
             gap: 20px;
             flex: 1;
             width: 100%;
-			 justify-content: center;
+            justify-content: center;
         }
 
         .sidebar-btn {
@@ -114,19 +114,18 @@
             border: none;
             cursor: pointer;
             color: white;
-			 justify-content: center;
             transition: all 0.2s;
-            ///position: relative;
+            position: relative;
         }
 
         .sidebar-btn:hover {
-            
             color: white;
+            opacity: 0.8;
         }
 
         .sidebar-btn.active {
-           
             color: white;
+            background: rgba(255,255,255,0.1);
         }
 
         .sidebar-btn .badge {
@@ -199,7 +198,13 @@
             border-radius: var(--border-radius); 
             padding: 20px; 
             margin-bottom: 20px; 
-            box-shadow: var(--shadow); 
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
         .post-header { 
@@ -286,6 +291,7 @@
             font-size: 14px; 
             flex: 1;
             justify-content: center;
+            transition: background 0.2s;
         }
         .action-btn:hover { background: var(--bg-color); }
         .action-btn.active { color: var(--primary-color); }
@@ -294,7 +300,20 @@
             margin-top: 15px; 
             padding-left: 15px; 
             border-left: 3px solid var(--primary-color); 
+            animation: slideDown 0.3s ease-out;
         }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         .comment { 
             padding: 8px 0; 
             border-bottom: 1px solid var(--border-color); 
@@ -302,6 +321,9 @@
             align-items: center; 
             gap: 10px; 
             font-size: 14px;
+        }
+        .comment:last-child {
+            border-bottom: none;
         }
         .comment-author { 
             font-weight: 600; 
@@ -351,6 +373,56 @@
             flex-shrink: 0;
         }
         .current-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Кнопка "Дальше" */
+        .load-more-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0 20px;
+        }
+        
+        .load-more-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .load-more-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        
+        .load-more-btn:active {
+            transform: translateY(0);
+        }
+        
+        .load-more-btn i {
+            font-size: 18px;
+        }
+        
+        .load-more-btn.loading {
+            opacity: 0.7;
+            cursor: wait;
+        }
+        
+        .posts-counter {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin: 10px 0;
+        }
 
         /* Статусы */
         .hidden { display: none !important; }
@@ -422,54 +494,59 @@
                 padding: 6px;
                 font-size: 12px;
             }
+            
+            .load-more-btn {
+                padding: 12px 30px;
+                font-size: 14px;
+            }
         }
 
         /* Анимации */
-        @keyframes slideIn {
+        @keyframes fadeIn {
             from {
-                opacity: 1;
-                transform: translateX(0);
+                opacity: 0;
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
-                transform: translateX(0);
+                transform: translateY(0);
             }
         }
         
         .post {
-            animation: slideIn 0.3s ease-out;
+            animation: fadeIn 0.5s ease-out;
         }
     </style>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <!-- Белый загрузочный экран -->
+    <!-- Загрузочный экран -->
     <div id="splashScreen">
         <div class="splash-content">
-            <div class="splash-title"></div>
-            <div class="splash-subtitle">...</div>
+            <div class="splash-title">Загрузка</div>
+            
         </div>
     </div>
 
     <div id="app">
         <!-- Боковая панель -->
-        <div class="sidebar">
-    
-    <div class="sidebar-nav">
-        <button class="sidebar-btn" id="homeBtn" title="Лента">
-            <i class="fas fa-home fa-light"></i>
-        </button>
-        <button class="sidebar-btn" id="profileSidebarBtn" onclick='navigateToUserProfile()' title="Профиль">
-            <i class="fas fa-user fa-light"></i>
-        </button>
-        <button class="sidebar-btn" id="followersSidebarBtn" title="Подписки">
-            <i class="fas fa-users"></i>
-        </button>
-        <button class="sidebar-btn" onclick="window.location.href='settings.html'" title="Настройки">
-            <i class="fas fa-cog"></i>
-        </button>
-    </div>
-</div>
+        <div class="sidebar hidden" id="sidebar">
+            <div class="sidebar-nav">
+                <button class="sidebar-btn" id="homeBtn" title="Лента">
+                    <i class="fas fa-home"></i>
+                </button>
+                <button class="sidebar-btn" id="profileSidebarBtn" click="navigateToUserProfile()" title="Профиль">
+                    <i class="fas fa-user"></i>
+                </button>
+                <button class="sidebar-btn" id="followersSidebarBtn" title="Подписки">
+                    <i class="fas fa-users"></i>
+                    
+                </button>
+                <button class="sidebar-btn" onclick="window.location.href='settings.html'" title="Настройки">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
 
         <!-- Основной контент -->
         <div class="main-content">
@@ -477,18 +554,17 @@
             <div id="authSection" class="card">
                 <h2 style="margin-bottom: 20px;">Вход в Zuia</h2>
                 
-                
-                
                 <!-- Форма входа по паролю -->
                 <div class="auth-form" id="passwordAuthForm">
                     <input type="email" id="loginEmail" placeholder="Email" value="test@example.com">
                     <input type="password" id="loginPassword" placeholder="Пароль" value="123456">
                     <button id="loginBtn">Войти</button>
-                    <p class="small-text" style="margin-top: 10px; color: #65676b;">Если аккаунта нет - создайтё новый!</p>
-					<button id="registerBtn" onclick="window.location.href='register.html'">Зарегистрироваться</button>
+                    <p class="small-text" style="margin-top: 10px; color: #65676b; text-align: center;">Если аккаунта нет - создайте новый!</p>
+                    <button id="registerBtn" onclick="window.location.href='register.html'">Зарегистрироваться</button>
                 </div>
                 
-               
+                <div id="authError" class="error"></div>
+            </div>
 
             <!-- Основное приложение -->
             <div id="appSection" class="hidden">
@@ -503,6 +579,15 @@
 
                 <!-- Лента постов -->
                 <div id="postsFeed"></div>
+                
+                <!-- Счетчик постов и кнопка "Дальше" -->
+                <div class="posts-counter" id="postsCounter"></div>
+                <div class="load-more-container">
+                    <button class="load-more-btn" id="loadMoreBtn">
+                        <i class="fas fa-arrow-right"></i>
+                        Дальше
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -518,14 +603,14 @@
     <script>
         // Конфигурация Firebase
         const firebaseConfig = {
-    apiKey: "AIzaSyAJW7vdvyHSv8CTOPG94ZhguocyrtRCezQ",
-    authDomain: "postyak-23e03.firebaseapp.com",
-    databaseURL: "https://postyak-23e03-default-rtdb.firebaseio.com",
-    projectId: "postyak-23e03",
-    storageBucket: "postyak-23e03.firebasestorage.app",
-    messagingSenderId: "595233424361",
-    appId: "1:595233424361:web:d915b8663541aaa1728178"
-  };
+            apiKey: "AIzaSyAJW7vdvyHSv8CTOPG94ZhguocyrtRCezQ",
+            authDomain: "postyak-23e03.firebaseapp.com",
+            databaseURL: "https://postyak-23e03-default-rtdb.firebaseio.com",
+            projectId: "postyak-23e03",
+            storageBucket: "postyak-23e03.firebasestorage.app",
+            messagingSenderId: "595233424361",
+            appId: "1:595233424361:web:d915b8663541aaa1728178"
+        };
 
         // Инициализация Firebase
         try {
@@ -534,15 +619,12 @@
         } catch (error) {
             console.error('Ошибка инициализации Firebase:', error);
         }
-        function navigateToUserProfile() {
-		    window.location.href = `user.html?id=${currentUser.uid}`;
-            
-        }
+
         const auth = firebase.auth();
         const database = firebase.database();
 
         // Настройка для входа по email
-        auth.useDeviceLanguage(); // Использует язык браузера для писем
+        auth.useDeviceLanguage();
 
         // Скрываем загрузочный экран через 2 секунды
         setTimeout(() => {
@@ -562,124 +644,49 @@
         const appSection = document.getElementById('appSection');
         const sidebar = document.getElementById('sidebar');
         const authError = document.getElementById('authError');
-        const authSuccess = document.getElementById('authSuccess');
         
         // Элементы для входа по паролю
-        const emailPasswordTab = document.getElementById('emailPasswordTab');
-        const emailCodeTab = document.getElementById('emailCodeTab');
-        const passwordAuthForm = document.getElementById('passwordAuthForm');
-        const codeAuthForm = document.getElementById('codeAuthForm');
         const loginEmail = document.getElementById('loginEmail');
         const loginPassword = document.getElementById('loginPassword');
         const loginBtn = document.getElementById('loginBtn');
         
-        // Элементы для входа по коду
-        const codeEmail = document.getElementById('codeEmail');
-        const sendCodeBtn = document.getElementById('sendCodeBtn');
-        const codeVerificationSection = document.getElementById('codeVerificationSection');
-        const codeInputs = ['code1', 'code2', 'code3', 'code4', 'code5', 'code6'].map(id => document.getElementById(id));
-        const verifyCodeBtn = document.getElementById('verifyCodeBtn');
-        const timerEl = document.getElementById('timer');
-        const resendCode = document.getElementById('resendCode');
-        
-        // Переменные для входа по коду
-        let confirmationResult = null;
-        let timerInterval = null;
-        let timeLeft = 60;
-
-        // Переключение между вкладками
-        emailPasswordTab.addEventListener('click', () => {
-            emailPasswordTab.classList.add('active');
-            emailCodeTab.classList.remove('active');
-            passwordAuthForm.classList.remove('hidden');
-            codeAuthForm.classList.add('hidden');
-            authError.textContent = '';
-            authSuccess.textContent = '';
-        });
-
-        emailCodeTab.addEventListener('click', () => {
-            emailCodeTab.classList.add('active');
-            emailPasswordTab.classList.remove('active');
-            passwordAuthForm.classList.add('hidden');
-            codeAuthForm.classList.remove('hidden');
-            authError.textContent = '';
-            authSuccess.textContent = '';
-        });
-
-        // --- Вход по паролю ---
-        const handlePasswordLogin = async () => {
-            const email = loginEmail.value;
-            const password = loginPassword.value;
-            authError.textContent = '';
-            
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-            } catch (error) {
-                if (error.code === 'auth/user-not-found') {
-                    try {
-                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                        await database.ref(`users/${userCredential.user.uid}`).set({
-                            email: email,
-                            avatar: null,
-                            nickname: null,
-                            verified: false,
-                            createdAt: firebase.database.ServerValue.TIMESTAMP
-                        });
-                    } catch (createError) {
-                        authError.textContent = 'Ошибка создания: ' + createError.message;
-                    }
-                } else {
-                    authError.textContent = 'Ошибка входа: ' + error.message;
-                }
-            }
-        };
-
-        if (loginBtn) {
-            loginBtn.addEventListener('click', handlePasswordLogin);
-        }
-
-        if (loginPassword) {
-            loginPassword.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handlePasswordLogin();
-            });
-        }
-
-        
-
-        // --- Остальной код (как в предыдущей версии) ---
         // DOM элементы для основного приложения
         const postError = document.getElementById('postError');
-        const profileError = document.getElementById('profileError');
-        const profileSuccess = document.getElementById('profileSuccess');
         const createPostBtn = document.getElementById('createPostBtn');
         const postText = document.getElementById('postText');
         const postImage = document.getElementById('postImage');
         const postsFeed = document.getElementById('postsFeed');
-        const avatarInput = document.getElementById('avatarInput');
-        const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
-        const currentAvatar = document.getElementById('currentAvatar');
         const followersList = document.getElementById('followersList');
         const closeFollowersBtn = document.getElementById('closeFollowersBtn');
-        const profileSettings = document.getElementById('profileSettings');
-        const nicknameInput = document.getElementById('nicknameInput');
-        const saveNicknameBtn = document.getElementById('saveNicknameBtn');
-        const sidebarFollowersCount = document.getElementById('sidebarFollowersCount');
-        const verifiedSection = document.getElementById('verifiedSection');
-        const toggleVerifiedBtn = document.getElementById('toggleVerifiedBtn');
         const createPostSection = document.getElementById('createPostSection');
         const followersModal = document.getElementById('followersModal');
         const modalOverlay = document.getElementById('modalOverlay');
+        const sidebarFollowersCount = document.getElementById('sidebarFollowersCount');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const postsCounter = document.getElementById('postsCounter');
 
         // Кнопки боковой панели
         const homeBtn = document.getElementById('homeBtn');
         const profileSidebarBtn = document.getElementById('profileSidebarBtn');
         const followersSidebarBtn = document.getElementById('followersSidebarBtn');
-        const settingsSidebarBtn = document.getElementById('settingsSidebarBtn');
-        const themeBtn = document.getElementById('themeBtn');
-        const logoutSidebarBtn = document.getElementById('logoutSidebarBtn');
 
         let currentUser = null;
         let selectedAvatarFile = null;
+        
+        // Переменные для пагинации
+        let allPosts = []; // Все посты из Firebase
+        let displayedPosts = []; // Посты, которые уже показаны
+        let currentPage = 0;
+        const POSTS_PER_PAGE = 7;
+
+        // Функция для перехода в профиль
+        function navigateToUserProfile() {
+            if (currentUser) {
+                window.location.href = `user.html?id=${currentUser.uid}`;
+            } else {
+                alert('Сначала войдите в систему');
+            }
+        }
 
         // Функция для отображения имени пользователя
         function getDisplayName(userData) {
@@ -692,20 +699,6 @@
         function getInitials(displayName) {
             if (!displayName) return '?';
             return displayName.substring(0, 2).toUpperCase();
-        }
-
-        // Функция для отображения аватара
-        function renderAvatar(container, userData, size = 'small') {
-            const sizeClass = size === 'large' ? 'large' : (size === 'small' ? 'small' : '');
-            if (userData && userData.avatar) {
-                container.innerHTML = `<img src="${userData.avatar}" alt="Avatar">`;
-            } else {
-                const displayName = getDisplayName(userData);
-                container.textContent = getInitials(displayName);
-                container.style.background = '#1877f2';
-                container.style.color = 'white';
-            }
-            container.className = `avatar ${sizeClass}`;
         }
 
         // Загрузка данных пользователя
@@ -735,55 +728,171 @@
 
         // Переключение секций
         function showSection(section) {
-            // Скрываем все секции
-            if (createPostSection) createPostSection.classList.remove('hidden');
-            if (profileSettings) profileSettings.classList.add('hidden');
-            
-            // Сбрасываем активные кнопки
             const sidebarBtns = document.querySelectorAll('.sidebar-btn');
             sidebarBtns.forEach(btn => btn.classList.remove('active'));
             
             if (section === 'home') {
                 if (createPostSection) createPostSection.classList.remove('hidden');
-                if (profileSettings) profileSettings.classList.add('hidden');
                 if (homeBtn) homeBtn.classList.add('active');
-            } else if (section === 'profile') {
-                 profileSidebarBtn.href = `user.html?id=${user.uid}`;
-            } else if (section === 'settings') {
-                if (createPostSection) createPostSection.classList.add('hidden');
-                if (profileSettings) profileSettings.classList.remove('hidden');
-                if (settingsSidebarBtn) settingsSidebarBtn.classList.add('active');
             }
         }
+
+        // --- Вход по паролю ---
+        const handlePasswordLogin = async () => {
+            const email = loginEmail.value;
+            const password = loginPassword.value;
+            authError.textContent = '';
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    try {
+                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        await database.ref(`users/${userCredential.user.uid}`).set({
+                            email: email,
+                            avatar: null,
+                            nickname: null,
+                            verified: false,
+                            createdAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                        console.log('Новый пользователь создан');
+                    } catch (createError) {
+                        authError.textContent = 'Ошибка создания: ' + createError.message;
+                    }
+                } else {
+                    authError.textContent = 'Ошибка входа: ' + error.message;
+                }
+            }
+        };
+
+        if (loginBtn) {
+            loginBtn.addEventListener('click', handlePasswordLogin);
+        }
+
+        if (loginPassword) {
+            loginPassword.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handlePasswordLogin();
+            });
+        }
+
+        // --- Функции для работы с постами ---
         
+        // Перемешивание массива (алгоритм Фишера-Йетса)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Загрузка следующей порции постов
+        function loadNextPosts() {
+            if (!allPosts.length) return;
+            
+            // Если все посты показаны, перемешиваем заново
+            if (displayedPosts.length >= allPosts.length) {
+                displayedPosts = [];
+                currentPage = 0;
+            }
+            
+            const start = currentPage * POSTS_PER_PAGE;
+            const end = start + POSTS_PER_PAGE;
+            
+            // Получаем следующую порцию постов
+            const nextPosts = allPosts.slice(start, end);
+            
+            // Добавляем к показанным
+            displayedPosts = [...displayedPosts, ...nextPosts];
+            
+            // Отображаем посты
+            renderPosts(displayedPosts);
+            
+            // Обновляем счетчик
+            updatePostsCounter();
+            
+            currentPage++;
+        }
+
+        // Обновление счетчика постов
+        function updatePostsCounter() {
+            if (postsCounter) {
+                postsCounter.textContent = `Показано ${displayedPosts.length} из ${allPosts.length} постов`;
+            }
+        }
+
+        // Отображение постов
+        function renderPosts(posts) {
+            if (!postsFeed) return;
+            
+            if (posts.length === 0) {
+                postsFeed.innerHTML = '<div class="card">Пока нет постов. Будьте первым!</div>';
+                return;
+            }
+            
+            postsFeed.innerHTML = posts.map(post => renderPost(post)).join('');
+            
+            posts.forEach(post => {
+                setupPostListeners(post.id);
+            });
+        }
+
+        // Загрузка всех постов из Firebase
+        async function loadAllPosts() {
+            try {
+                const snapshot = await database.ref('posts').once('value');
+                const posts = snapshot.val();
+                
+                if (!posts) {
+                    allPosts = [];
+                    if (postsFeed) {
+                        postsFeed.innerHTML = '<div class="card">Пока нет постов. Будьте первым!</div>';
+                    }
+                    return;
+                }
+
+                // Преобразуем объект в массив
+                const postsArray = Object.entries(posts).map(([id, data]) => ({ id, ...data }));
+                
+                // Загружаем данные авторов
+                for (const post of postsArray) {
+                    const userData = await loadUserData(post.authorId);
+                    post.authorAvatar = userData.avatar || null;
+                    post.authorDisplayName = getDisplayName(userData);
+                    post.authorVerified = userData.verified || false;
+                }
+                
+                // Перемешиваем посты
+                allPosts = shuffleArray(postsArray);
+                
+                // Сбрасываем пагинацию
+                displayedPosts = [];
+                currentPage = 0;
+                
+                // Загружаем первую порцию
+                loadNextPosts();
+                
+            } catch (error) {
+                console.error('Ошибка загрузки постов:', error);
+                if (postsFeed) {
+                    postsFeed.innerHTML = '<div class="card error">Ошибка загрузки постов</div>';
+                }
+            }
+        }
+
         // Отслеживаем состояние аутентификации
         auth.onAuthStateChanged(async user => {
             if (user) {
                 currentUser = user;
-                const userData = await loadUserData(user.uid);
-                profileSidebarBtn.href = `user.html?id=${user.uid}`;
-                // Проверяем, админ ли это
-                if (user.email === 'admin@zuia.com' && verifiedSection) {
-                    verifiedSection.classList.remove('hidden');
-                }
-                
-                // Загружаем текущие данные
-                if (userData.avatar && currentAvatar) {
-                    renderAvatar(currentAvatar, userData);
-                } else if (currentAvatar) {
-                    renderAvatar(currentAvatar, { email: user.email });
-                }
-                
-                if (nicknameInput && userData.nickname) {
-                    nicknameInput.value = userData.nickname;
-                }
                 
                 if (authSection) authSection.classList.add('hidden');
                 if (appSection) appSection.classList.remove('hidden');
                 if (sidebar) sidebar.classList.remove('hidden');
                 
-                loadPosts();
-                updateFollowersCount();
+                await loadAllPosts();
+                await updateFollowersCount();
                 showSection('home');
             } else {
                 currentUser = null;
@@ -794,122 +903,40 @@
         });
 
         // Навигация по боковой панели
-        if (homeBtn) homeBtn.addEventListener('click', () => showSection('home'));
-        if (profileSidebarBtn) profileSidebarBtn.addEventListener('click', () => showSection('profile'));
-        if (settingsSidebarBtn) settingsSidebarBtn.addEventListener('click', () => showSection('settings'));
-
-        if (logoutSidebarBtn) {
-            logoutSidebarBtn.addEventListener('click', () => auth.signOut());
+        if (homeBtn) {
+            homeBtn.addEventListener('click', () => {
+                showSection('home');
+                // Перемешиваем и показываем новые посты при клике на ленту
+                if (allPosts.length) {
+                    allPosts = shuffleArray(allPosts);
+                    displayedPosts = [];
+                    currentPage = 0;
+                    loadNextPosts();
+                }
+            });
         }
-
         
-
-        // --- Сохранение никнейма ---
-        if (saveNicknameBtn) {
-            saveNicknameBtn.addEventListener('click', async () => {
-                if (!currentUser) return;
-                
-                const nickname = nicknameInput ? nicknameInput.value.trim() : '';
-                try {
-                    await database.ref(`users/${currentUser.uid}`).update({
-                        nickname: nickname || null,
-                        updatedAt: firebase.database.ServerValue.TIMESTAMP
-                    });
-                    
-                    if (profileSuccess) {
-                        profileSuccess.textContent = 'Никнейм сохранен!';
-                    }
-                    if (profileError) {
-                        profileError.textContent = '';
-                    }
-                    
-                    setTimeout(() => {
-                        if (profileSuccess) profileSuccess.textContent = '';
-                    }, 3000);
-                } catch (error) {
-                    if (profileError) {
-                        profileError.textContent = 'Ошибка сохранения: ' + error.message;
-                    }
-                }
-            });
+        if (profileSidebarBtn) {
+            profileSidebarBtn.addEventListener('click', navigateToUserProfile);
         }
 
-        // --- Верификация (только для админа) ---
-        if (toggleVerifiedBtn) {
-            toggleVerifiedBtn.addEventListener('click', async () => {
-                if (!currentUser || currentUser.email !== 'admin@zuia.com') return;
+        // Кнопка "Дальше"
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', async () => {
+                // Блокируем кнопку на время загрузки
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.classList.add('loading');
+                loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
                 
-                const userId = prompt('Введите ID пользователя для верификации:');
-                if (!userId) return;
-                
-                const userData = await loadUserData(userId);
-                const newVerifiedStatus = !userData.verified;
-                
-                await database.ref(`users/${userId}`).update({
-                    verified: newVerifiedStatus
-                });
-                
-                alert(`Галочка ${newVerifiedStatus ? 'добавлена' : 'убрана'}`);
-                loadPosts();
-            });
-        }
-
-        // --- Загрузка аватара ---
-        if (avatarInput) {
-            avatarInput.addEventListener('change', (e) => {
-                if (e.target.files[0]) {
-                    selectedAvatarFile = e.target.files[0];
-                    if (uploadAvatarBtn) uploadAvatarBtn.disabled = false;
+                // Небольшая задержка для плавности
+                setTimeout(() => {
+                    loadNextPosts();
                     
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        if (currentAvatar) {
-                            currentAvatar.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
-                        }
-                    };
-                    reader.readAsDataURL(selectedAvatarFile);
-                }
-            });
-        }
-
-        if (uploadAvatarBtn) {
-            uploadAvatarBtn.addEventListener('click', async () => {
-                if (!selectedAvatarFile || !currentUser) return;
-
-                try {
-                    if (selectedAvatarFile.size > 2 * 1024 * 1024) {
-                        if (profileError) profileError.textContent = 'Файл слишком большой (макс. 2MB)';
-                        return;
-                    }
-
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        const avatarBase64 = e.target.result;
-                        
-                        await database.ref(`users/${currentUser.uid}`).update({
-                            avatar: avatarBase64,
-                            updatedAt: firebase.database.ServerValue.TIMESTAMP
-                        });
-
-                        if (profileError) profileError.textContent = '';
-                        if (profileSuccess) {
-                            profileSuccess.textContent = 'Аватар успешно загружен!';
-                        }
-                        if (uploadAvatarBtn) uploadAvatarBtn.disabled = true;
-                        selectedAvatarFile = null;
-                        
-                        setTimeout(() => {
-                            if (profileSuccess) profileSuccess.textContent = '';
-                        }, 3000);
-                        
-                        loadPosts();
-                    };
-                    reader.readAsDataURL(selectedAvatarFile);
-                } catch (error) {
-                    if (profileError) {
-                        profileError.textContent = 'Ошибка загрузки: ' + error.message;
-                    }
-                }
+                    // Разблокируем кнопку
+                    loadMoreBtn.disabled = false;
+                    loadMoreBtn.classList.remove('loading');
+                    loadMoreBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Дальше';
+                }, 300);
             });
         }
 
@@ -935,7 +962,7 @@
                                 
                                 const avatar = document.createElement('div');
                                 avatar.className = 'avatar small';
-                                renderAvatar(avatar, userData, 'small');
+                                avatar.textContent = getInitials(getDisplayName(userData));
                                 
                                 const name = document.createElement('span');
                                 name.textContent = getDisplayName(userData);
@@ -977,9 +1004,9 @@
             });
         }
 
-        // --- Работа с постами ---
+        // --- Создание нового поста ---
         const createPost = async () => {
-            if (!postText || !postImage) return;
+            if (!postText || !postImage || !currentUser) return;
             
             const text = postText.value.trim();
             if (!text && !postImage.files[0]) {
@@ -1021,6 +1048,10 @@
                 postText.value = '';
                 postImage.value = '';
                 if (postError) postError.textContent = '';
+                
+                // Перезагружаем посты после публикации
+                await loadAllPosts();
+                
             } catch (error) {
                 if (postError) postError.textContent = 'Ошибка публикации: ' + error.message;
             }
@@ -1030,39 +1061,7 @@
             createPostBtn.addEventListener('click', createPost);
         }
 
-        // Загрузка постов
-        const loadPosts = () => {
-            const postsRef = database.ref('posts').orderByChild('timestamp');
-            postsRef.on('value', async (snapshot) => {
-                const posts = snapshot.val();
-                if (!posts) {
-                    if (postsFeed) {
-                        postsFeed.innerHTML = '<div class="card">Пока нет постов. Будьте первым!</div>';
-                    }
-                    return;
-                }
-
-                const postsArray = Object.entries(posts).map(([id, data]) => ({ id, ...data }));
-                postsArray.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-                // Загружаем данные авторов
-                for (const post of postsArray) {
-                    const userData = await loadUserData(post.authorId);
-                    post.authorAvatar = userData.avatar || null;
-                    post.authorDisplayName = getDisplayName(userData);
-                    post.authorVerified = userData.verified || false;
-                }
-
-                if (postsFeed) {
-                    postsFeed.innerHTML = postsArray.map(post => renderPost(post)).join('');
-                }
-
-                postsArray.forEach(post => {
-                    setupPostListeners(post.id);
-                });
-            });
-        };
-
+        // --- Функции для рендеринга ---
         const renderPost = (post) => {
             const userLiked = post.likes && currentUser && post.likes[currentUser.uid];
             const likesCount = post.likes ? Object.keys(post.likes).length : 0;
@@ -1136,7 +1135,7 @@
                     const input = document.getElementById(`comment-input-${postId}`);
                     if (input) {
                         const text = input.value.trim();
-                        if (text) {
+                        if (text && currentUser) {
                             handleAddComment(postId, text);
                             input.value = '';
                         }
@@ -1149,7 +1148,7 @@
                 commentInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         const text = e.target.value.trim();
-                        if (text) {
+                        if (text && currentUser) {
                             handleAddComment(postId, text);
                             e.target.value = '';
                         }
@@ -1193,4 +1192,3 @@
     </script>
 </body>
 </html>
-
