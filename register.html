@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zuia - Регистрация</title>
+    <!-- Подключаем Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <!-- Подключаем Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary-color: #1877f2;
+            --primary-hover: #166fe5;
+            --bg-color: #f0f2f5;
+            --card-bg: white;
+            --text-primary: #1c1e21;
+            --text-secondary: #65676b;
+            --border-color: #ddd;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            
+            --border-radius: 16px;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; 
+            background: black;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            max-width: 450px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 48px;
+            color: white;
+           
+            letter-spacing: 2px;
+        }
+
+        .logo p {
+            color: rgba(255,255,255,0.9);
+            font-size: 16px;
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            border-radius: var(--border-radius); 
+            padding: 30px; 
+            
+           
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        input { 
+            width: 100%; 
+            padding: 15px 15px 15px 45px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 12px; 
+            font-size: 15px; 
+            transition: all 0.3s;
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            
+        }
+
+        input.error {
+            border-color: var(--error-color);
+        }
+
+        .password-strength {
+            margin-top: 5px;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .strength-weak { background: #dc3545; width: 33.33%; }
+        .strength-medium { background: #ffc107; width: 66.66%; }
+        .strength-strong { background: #28a745; width: 100%; }
+
+        .password-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .password-hint i {
+            font-size: 12px;
+        }
+
+        .password-hint.valid {
+            color: var(--success-color);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-group label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .checkbox-group a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background: black;
+            color: white; 
+            font-weight: 600; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        .success-message {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+        }
+
+        .login-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .terms {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .terms a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .terms a:hover {
+            color: var(--primary-color);
+        }
+
+        
+
+        /* Мобильная адаптация */
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+            }
+
+            .logo h1 {
+                font-size: 36px;
+            }
+
+            input {
+                padding: 12px 12px 12px 40px;
+                font-size: 14px;
+            }
+
+            button {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="logo">
+            
+        </div>
+
+        <div class="card">
+            <h2>Создать аккаунт</h2>
+
+            <!-- Форма регистрации -->
+            <form id="registerForm">
+                <!-- Email -->
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email" required autocomplete="email">
+                </div>
+
+                <!-- Никнейм -->
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="nickname" placeholder="Никнейм (необязательно)" autocomplete="nickname">
+                </div>
+
+                <!-- Пароль -->
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Пароль" required autocomplete="new-password">
+                </div>
+
+                <!-- Индикатор сложности пароля -->
+                <div class="password-strength">
+                    <div class="password-strength-bar" id="passwordStrength"></div>
+                </div>
+
+                <!-- Подсказки для пароля -->
+                <div class="password-hint" id="lengthHint">
+                    <i class="fas fa-circle"></i> Минимум 6 символов
+                </div>
+                <div class="password-hint" id="letterHint">
+                    <i class="fas fa-circle"></i> Хотя бы одна буква
+                </div>
+                <div class="password-hint" id="numberHint">
+                    <i class="fas fa-circle"></i> Хотя бы одна цифра
+                </div>
+
+                <!-- Подтверждение пароля -->
+                <div class="input-group" style="margin-top: 15px;">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="confirmPassword" placeholder="Подтвердите пароль" required autocomplete="new-password">
+                </div>
+
+                <!-- Согласие с правилами -->
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms" checked>
+                    <label for="terms">
+                        Я согласен с <a href="policy.html" onclick="alert('Правила использования Zuia')">условиями использования</a>
+                    </label>
+                </div>
+
+                <!-- Сообщения -->
+                <div id="messageContainer"></div>
+
+                <!-- Кнопка регистрации -->
+                <button type="submit" id="registerBtn">
+                    
+                    <span>Зарегистрироваться</span>
+                </button>
+            </form>
+
+            <!-- Ссылка на вход -->
+            <div class="login-link">
+                Уже есть аккаунт? <a href="index.html">Войти</a>
+            </div>
+
+            <!-- Дополнительные ссылки -->
+            
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+    apiKey: "AIzaSyAJW7vdvyHSv8CTOPG94ZhguocyrtRCezQ",
+    authDomain: "postyak-23e03.firebaseapp.com",
+    databaseURL: "https://postyak-23e03-default-rtdb.firebaseio.com",
+    projectId: "postyak-23e03",
+    storageBucket: "postyak-23e03.firebasestorage.app",
+    messagingSenderId: "595233424361",
+    appId: "1:595233424361:web:d915b8663541aaa1728178"
+     };
+
+        // Инициализация Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase инициализирован');
+        } catch (error) {
+            console.error('❌ Ошибка инициализации Firebase:', error);
+        }
+
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // DOM элементы
+        const form = document.getElementById('registerForm');
+        const emailInput = document.getElementById('email');
+        const nicknameInput = document.getElementById('nickname');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const registerBtn = document.getElementById('registerBtn');
+        const messageContainer = document.getElementById('messageContainer');
+        const termsCheckbox = document.getElementById('terms');
+        
+        // Элементы для проверки пароля
+        const lengthHint = document.getElementById('lengthHint');
+        const letterHint = document.getElementById('letterHint');
+        const numberHint = document.getElementById('numberHint');
+        const passwordStrength = document.getElementById('passwordStrength');
+
+        // Функция для отображения сообщений
+        function showMessage(text, type) {
+            messageContainer.innerHTML = `
+                <div class="message ${type}-message">
+                    <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                    <span>${text}</span>
+                </div>
+            `;
+            
+            // Автоматически скрываем через 5 секунд
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Функция для проверки сложности пароля
+        function checkPasswordStrength(password) {
+            const hasLength = password.length >= 6;
+            const hasLetter = /[a-zA-Z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            // Обновляем подсказки
+            lengthHint.className = `password-hint ${hasLength ? 'valid' : ''}`;
+            lengthHint.innerHTML = `<i class="fas ${hasLength ? 'fa-check-circle' : 'fa-circle'}"></i> Минимум 6 символов`;
+            
+            letterHint.className = `password-hint ${hasLetter ? 'valid' : ''}`;
+            letterHint.innerHTML = `<i class="fas ${hasLetter ? 'fa-check-circle' : 'fa-circle'}"></i> Хотя бы одна буква`;
+            
+            numberHint.className = `password-hint ${hasNumber ? 'valid' : ''}`;
+            numberHint.innerHTML = `<i class="fas ${hasNumber ? 'fa-check-circle' : 'fa-circle'}"></i> Хотя бы одна цифра`;
+
+            // Обновляем индикатор силы
+            if (hasLength && hasLetter && hasNumber) {
+                passwordStrength.className = 'password-strength-bar strength-strong';
+            } else if ((hasLength && hasLetter) || (hasLength && hasNumber)) {
+                passwordStrength.className = 'password-strength-bar strength-medium';
+            } else if (hasLength) {
+                passwordStrength.className = 'password-strength-bar strength-weak';
+            } else {
+                passwordStrength.className = 'password-strength-bar';
+            }
+
+            return hasLength && hasLetter && hasNumber;
+        }
+
+        // Слушаем изменения пароля
+        passwordInput.addEventListener('input', (e) => {
+            checkPasswordStrength(e.target.value);
+            
+            // Проверяем совпадение с подтверждением
+            if (confirmPasswordInput.value) {
+                if (e.target.value !== confirmPasswordInput.value) {
+                    confirmPasswordInput.classList.add('error');
+                } else {
+                    confirmPasswordInput.classList.remove('error');
+                }
+            }
+        });
+
+        // Проверка совпадения паролей
+        confirmPasswordInput.addEventListener('input', (e) => {
+            if (e.target.value !== passwordInput.value) {
+                e.target.classList.add('error');
+            } else {
+                e.target.classList.remove('error');
+            }
+        });
+
+        // Функция регистрации
+        async function registerUser(email, password, nickname) {
+            try {
+                // Создаем пользователя в Firebase Auth
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                console.log('✅ Пользователь создан:', user.uid);
+
+                // Создаем запись в базе данных
+                await database.ref(`users/${user.uid}`).set({
+                    email: email,
+                    nickname: nickname || email.split('@')[0],
+                    avatar: null,
+                    verified: false,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                    lastLogin: firebase.database.ServerValue.TIMESTAMP,
+                    settings: {
+                        theme: 'light',
+                        notifications: true,
+                        privateProfile: false
+                    }
+                });
+
+                // Отправляем письмо для подтверждения email
+                await user.sendEmailVerification({
+                    url: window.location.origin + '/index.html',
+                    handleCodeInApp: true
+                });
+
+                return { success: true, user };
+            } catch (error) {
+                console.error('❌ Ошибка регистрации:', error);
+                throw error;
+            }
+        }
+
+        // Обработка отправки формы
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Получаем значения
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const nickname = nicknameInput.value.trim();
+            const termsAccepted = termsCheckbox.checked;
+
+            // Валидация
+            if (!email || !password || !confirmPassword) {
+                showMessage('Заполните все обязательные поля', 'error');
+                return;
+            }
+
+            if (!termsAccepted) {
+                showMessage('Необходимо принять условия использования', 'error');
+                return;
+            }
+
+            // Проверка email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showMessage('Введите корректный email адрес', 'error');
+                return;
+            }
+
+            // Проверка сложности пароля
+            if (!checkPasswordStrength(password)) {
+                showMessage('Пароль должен содержать минимум 6 символов, буквы и цифры', 'error');
+                return;
+            }
+
+            // Проверка совпадения паролей
+            if (password !== confirmPassword) {
+                showMessage('Пароли не совпадают', 'error');
+                return;
+            }
+
+            // Блокируем кнопку
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<i class="fas fa-spinner spinner"></i> Регистрация...';
+
+            try {
+                // Регистрируем пользователя
+                const result = await registerUser(email, password, nickname);
+                
+                // Показываем успех
+                showMessage(
+                    '✅ Регистрация успешна! Проверьте почту для подтверждения email. Перенаправляем...', 
+                    'success'
+                );
+
+                // Очищаем форму
+                form.reset();
+                passwordStrength.className = 'password-strength-bar';
+
+                // Перенаправляем через 3 секунды
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
+
+            } catch (error) {
+                // Обрабатываем ошибки Firebase
+                let errorMessage = 'Ошибка при регистрации';
+                
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Этот email уже зарегистрирован';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Некорректный email адрес';
+                        break;
+                    case 'auth/operation-not-allowed':
+                        errorMessage = 'Регистрация временно отключена';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'Слишком слабый пароль';
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                showMessage(errorMessage, 'error');
+                
+                // Разблокируем кнопку
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = '<i class="fas fa-user-plus"></i><span>Зарегистрироваться</span>';
+            }
+        });
+
+        // Проверяем, авторизован ли уже пользователь
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Если уже авторизован, перенаправляем на главную
+                window.location.href = 'index.html';
+            }
+        });
+
+        console.log('✅ Страница регистрации готова');
+    </script>
+</body>
+</html>
