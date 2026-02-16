@@ -523,8 +523,8 @@
     <!-- Загрузочный экран -->
     <div id="splashScreen">
         <div class="splash-content">
-            <div class="splash-title">Загрузка</div>
-            
+            <div class="splash-title">ZUIA</div>
+            <div class="splash-subtitle">социальная сеть</div>
         </div>
     </div>
 
@@ -535,12 +535,12 @@
                 <button class="sidebar-btn" id="homeBtn" title="Лента">
                     <i class="fas fa-home"></i>
                 </button>
-                <button class="sidebar-btn" id="profileSidebarBtn" click="navigateToUserProfile()" title="Профиль">
+                <button class="sidebar-btn" id="profileSidebarBtn" title="Профиль">
                     <i class="fas fa-user"></i>
                 </button>
                 <button class="sidebar-btn" id="followersSidebarBtn" title="Подписки">
                     <i class="fas fa-users"></i>
-                    
+                    <span id="sidebarFollowersCount" class="badge">0</span>
                 </button>
                 <button class="sidebar-btn" onclick="window.location.href='settings.html'" title="Настройки">
                     <i class="fas fa-cog"></i>
@@ -674,8 +674,8 @@
         let selectedAvatarFile = null;
         
         // Переменные для пагинации
-        let allPosts = []; // Все посты из Firebase
-        let displayedPosts = []; // Посты, которые уже показаны
+        let allPosts = [];
+        let displayedPosts = [];
         let currentPage = 0;
         const POSTS_PER_PAGE = 7;
 
@@ -778,7 +778,7 @@
 
         // --- Функции для работы с постами ---
         
-        // Перемешивание массива (алгоритм Фишера-Йетса)
+        // Перемешивание массива
         function shuffleArray(array) {
             const newArray = [...array];
             for (let i = newArray.length - 1; i > 0; i--) {
@@ -792,7 +792,6 @@
         function loadNextPosts() {
             if (!allPosts.length) return;
             
-            // Если все посты показаны, перемешиваем заново
             if (displayedPosts.length >= allPosts.length) {
                 displayedPosts = [];
                 currentPage = 0;
@@ -801,16 +800,10 @@
             const start = currentPage * POSTS_PER_PAGE;
             const end = start + POSTS_PER_PAGE;
             
-            // Получаем следующую порцию постов
             const nextPosts = allPosts.slice(start, end);
-            
-            // Добавляем к показанным
             displayedPosts = [...displayedPosts, ...nextPosts];
             
-            // Отображаем посты
             renderPosts(displayedPosts);
-            
-            // Обновляем счетчик
             updatePostsCounter();
             
             currentPage++;
@@ -853,10 +846,8 @@
                     return;
                 }
 
-                // Преобразуем объект в массив
                 const postsArray = Object.entries(posts).map(([id, data]) => ({ id, ...data }));
                 
-                // Загружаем данные авторов
                 for (const post of postsArray) {
                     const userData = await loadUserData(post.authorId);
                     post.authorAvatar = userData.avatar || null;
@@ -864,14 +855,10 @@
                     post.authorVerified = userData.verified || false;
                 }
                 
-                // Перемешиваем посты
                 allPosts = shuffleArray(postsArray);
-                
-                // Сбрасываем пагинацию
                 displayedPosts = [];
                 currentPage = 0;
                 
-                // Загружаем первую порцию
                 loadNextPosts();
                 
             } catch (error) {
@@ -906,7 +893,6 @@
         if (homeBtn) {
             homeBtn.addEventListener('click', () => {
                 showSection('home');
-                // Перемешиваем и показываем новые посты при клике на ленту
                 if (allPosts.length) {
                     allPosts = shuffleArray(allPosts);
                     displayedPosts = [];
@@ -923,16 +909,13 @@
         // Кнопка "Дальше"
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', async () => {
-                // Блокируем кнопку на время загрузки
                 loadMoreBtn.disabled = true;
                 loadMoreBtn.classList.add('loading');
                 loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
                 
-                // Небольшая задержка для плавности
                 setTimeout(() => {
                     loadNextPosts();
                     
-                    // Разблокируем кнопку
                     loadMoreBtn.disabled = false;
                     loadMoreBtn.classList.remove('loading');
                     loadMoreBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Дальше';
@@ -1049,7 +1032,6 @@
                 postImage.value = '';
                 if (postError) postError.textContent = '';
                 
-                // Перезагружаем посты после публикации
                 await loadAllPosts();
                 
             } catch (error) {
@@ -1084,10 +1066,10 @@
                     ${post.image ? `<img src="${post.image}" class="post-image" alt="Post image">` : ''}
                     <div class="post-actions">
                         <button class="action-btn like-btn ${userLiked ? 'active' : ''}" data-post-id="${post.id}">
-                            ❤ <span>${likesCount}</span>
+                            ❤ <span class="likes-count-${post.id}">${likesCount}</span>
                         </button>
                         <button class="action-btn comment-toggle-btn" data-post-id="${post.id}">
-                            💬 <span>${commentsCount}</span>
+                            💬 <span class="comments-count-${post.id}">${commentsCount}</span>
                         </button>
                     </div>
                     <div class="comment-box hidden" id="comments-${post.id}">
@@ -1106,7 +1088,7 @@
         const renderComments = (comments) => {
             if (!comments) return '';
             return Object.entries(comments).map(([id, comment]) => `
-                <div class="comment">
+                <div class="comment" id="comment-${id}">
                     <a href="user.html?id=${comment.authorId}" class="comment-author">${comment.author ? comment.author.split('@')[0] : 'Аноним'}</a>
                     <span>${escapeHtml(comment.text)}</span>
                 </div>
@@ -1158,29 +1140,91 @@
         };
 
         const handleLike = async (postId) => {
-            if (!currentUser) return;
+            if (!currentUser) {
+                alert('Войдите, чтобы ставить лайки');
+                return;
+            }
             
-            const postRef = database.ref(`posts/${postId}/likes/${currentUser.uid}`);
-            const snapshot = await postRef.once('value');
-            
-            if (snapshot.exists()) {
-                await postRef.remove();
-            } else {
-                await postRef.set(true);
+            try {
+                const postRef = database.ref(`posts/${postId}/likes/${currentUser.uid}`);
+                const snapshot = await postRef.once('value');
+                const likeExists = snapshot.exists();
+                
+                if (likeExists) {
+                    await postRef.remove();
+                    console.log('Лайк убран');
+                } else {
+                    await postRef.set(true);
+                    console.log('Лайк поставлен');
+                }
+                
+                // Обновляем счетчик лайков в UI
+                const likesSpan = document.querySelector(`.likes-count-${postId}`);
+                if (likesSpan) {
+                    const currentCount = parseInt(likesSpan.textContent) || 0;
+                    likesSpan.textContent = likeExists ? currentCount - 1 : currentCount + 1;
+                }
+                
+                // Обновляем класс кнопки
+                const likeBtn = document.querySelector(`.like-btn[data-post-id="${postId}"]`);
+                if (likeBtn) {
+                    if (likeExists) {
+                        likeBtn.classList.remove('active');
+                    } else {
+                        likeBtn.classList.add('active');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Ошибка при обработке лайка:', error);
+                alert('Ошибка: ' + error.message);
             }
         };
 
         const handleAddComment = async (postId, text) => {
-            if (!currentUser || !text) return;
+            if (!currentUser) {
+                alert('Войдите, чтобы комментировать');
+                return;
+            }
 
-            const newComment = {
-                author: currentUser.email,
-                authorId: currentUser.uid,
-                text: text,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            };
+            try {
+                const newCommentRef = database.ref(`posts/${postId}/comments`).push();
+                const commentId = newCommentRef.key;
+                
+                const newComment = {
+                    id: commentId,
+                    author: currentUser.email,
+                    authorId: currentUser.uid,
+                    text: text,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
 
-            await database.ref(`posts/${postId}/comments`).push(newComment);
+                await newCommentRef.set(newComment);
+                console.log('Комментарий добавлен');
+                
+                // Добавляем комментарий в UI
+                const commentsList = document.getElementById(`comments-list-${postId}`);
+                if (commentsList) {
+                    const commentHtml = `
+                        <div class="comment" id="comment-${commentId}">
+                            <a href="user.html?id=${currentUser.uid}" class="comment-author">${currentUser.email.split('@')[0]}</a>
+                            <span>${escapeHtml(text)}</span>
+                        </div>
+                    `;
+                    commentsList.innerHTML += commentHtml;
+                }
+                
+                // Обновляем счетчик комментариев
+                const commentsSpan = document.querySelector(`.comments-count-${postId}`);
+                if (commentsSpan) {
+                    const currentCount = parseInt(commentsSpan.textContent) || 0;
+                    commentsSpan.textContent = currentCount + 1;
+                }
+                
+            } catch (error) {
+                console.error('Ошибка при добавлении комментария:', error);
+                alert('Ошибка: ' + error.message);
+            }
         };
 
         const escapeHtml = (text) => {
@@ -1191,4 +1235,4 @@
         };
     </script>
 </body>
-</html>
+    </html>
